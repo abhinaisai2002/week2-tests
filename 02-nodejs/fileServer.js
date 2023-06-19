@@ -21,5 +21,71 @@ const fs = require('fs');
 const path = require('path');
 const app = express();
 
+function getFiles(path) {
+
+  return new Promise((res, rej) => {
+    fs.readdir(path, function (err, data) {
+      if (err) {
+        rej(err);
+      }
+      // console.log(data);
+      res(data);
+    })
+  })
+
+}
+
+function getFile(path) {
+  return new Promise((res, rej) => {
+    fs.readFile(path, function (err, data) {
+      if (err) {
+        // console.log(err);
+        rej(err);
+      }
+      res(data);
+    })
+  })
+}
+
+app.get('/files', async function (req,res) {
+
+  try {
+    const files = await getFiles(path.join(__dirname, 'files'));
+    
+    res.status(200).send(files);
+  }
+  catch (err) {
+    res.status(500).send("Internal Server Error");
+  }
+
+})
+
+app.get('/file/:filename', async function (req, res) {
+  let fileName = req.params.filename;
+
+  try {
+    const fileData = await getFile(path.join(__dirname, 'files', fileName));
+    res.status(200)
+      .send(fileData.toString());
+  }
+  catch (err) {
+    // console.log(err,err.code)
+    if(err.errno === -2)
+      return res.status(404).send("File not found");
+    res.status(500).send("Internal Server Error")
+  }
+
+})
+
+app.use(function (req, res) {
+  res.status(404).send('Route not found')
+})
+
+
+
+
+// app.listen(3000, function () {
+//   console.log("started")
+// })
 
 module.exports = app;
