@@ -29,9 +29,77 @@
   Testing the server - run `npm run test-authenticationServer` command in terminal
  */
 
-const express = require("express")
+const express = require("express");
+const { v4:uuidv4 } = require('uuid');
 const PORT = 3000;
 const app = express();
+const jwt = require('jsonwebtoken');
 // write your logic here, DONT WRITE app.listen(3000) when you're running tests, the tests will automatically start the server
+
+const users = [];
+
+app.use(express.json());
+
+app.post('/signup', async function (req, res) {
+  const { email, password, firstName, lastName } = req.body;
+
+  if (!email || !password || !firstName || !lastName){
+    return res.status(400).send("Some fields are empty");
+  }
+  let user = users.find(u => u.email === email);
+  if (!user) {
+    users.push({
+      id:uuidv4(),
+      email, password, firstName, lastName
+    })
+
+    res.status(201).send('Signup successful');
+  }
+  else {
+    return res.status(400).send('Username already exists');
+  }
+})
+
+app.post('/login', async function (req, res) {
+  let { email, password } = req.body;
+
+  let user = users.find(u => u.email === email);
+  if (user) {
+    if (user.password === password) {
+      let token = Buffer.from(email).toString('base64');
+      
+      return res.status(200).send({
+        authToken: token,
+        email,
+        firstName: user.firstName,
+        lastName:user.lastName
+      })
+
+    } else {
+      return res.status(401).send("Invalid Credentials");
+    }
+  }
+
+  return res.status(404).send('User not found');
+
+})
+
+app.get('/data', function (req, res) {
+  
+  let { email, password } = req.headers;
+  let user = users.find(u => u.email === email);
+  if (user) {
+    if (user.password === password) {
+      
+      res.status(200).send({users});
+
+    } else {
+      return res.status(401).send("Unauthorized");
+    }
+  }
+
+  return res.status(404).send('User not found');
+
+})
 
 module.exports = app;
