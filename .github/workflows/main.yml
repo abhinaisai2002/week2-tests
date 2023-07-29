@@ -12,7 +12,7 @@ jobs:
     - name: change dir
       run: cd 02-nodejs
     - name: Install dependencies
-      run: npm ci
+      run: npm install
     - name: change dir to test
       run: cd tests
     - name: Test 1
