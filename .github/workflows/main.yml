@@ -1,0 +1,23 @@
+name: main
+
+on: [workflow_dispatch]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu environment
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: change dir
+      run: cd 02-nodejs
+    - name: Install dependencies
+      run: npm ci
+    - name: change dir to test
+      run: cd tests
+    - name: Test 1
+      run: npm run test-fileServer
+    - name: Test 2
+      run: npm run test-todoServer
+    - name: Test 3
+      run: npm run test-authenticationServer
